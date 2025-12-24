@@ -1,0 +1,57 @@
+openapi: 3.0.0  # OpenAPI版本，固定3.0.0
+info:
+  title: 矿物加工物性查询API
+  description: 提供矿物物理化学参数查询接口，支持选矿工程所需的密度、硬度、化学式等关键数据
+  version: 1.0.0  # 接口版本，自定义
+servers:
+  - url: https://api.mineralogy.rocks  # 目标API的基础URL（无需改，mineralogy.rocks专用）
+paths:
+  /minerals:  # API接口路径（与基础URL拼接为完整接口：https://api.mineralogy.rocks/minerals）
+    get:
+      operationId: getMineralProperties  # 接口唯一标识（英文，无空格）
+      summary: 查询矿物物性参数
+      description: 输入矿物英文名，返回该矿物的化学式、密度、莫氏硬度、晶系等选矿关键参数
+      parameters:  # 接口参数（与API实际参数一致）
+        - name: q
+          in: query  # 参数位置（query=URL参数，如?q=quartz）
+          required: true  # 是否必填（是填true，否填false）
+          schema:
+            type: string
+            description: 矿物英文名（如石英=quartz、黄铁矿=pyrite、黄铜矿=chalcopyrite、方铅矿=galena）
+            example: "quartz"  # 示例值，帮助AI理解
+      responses:  # 接口返回格式定义
+        '200':  # 成功响应码
+          description: 成功返回矿物数据（数组形式，取第一个结果）
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      description: 矿物名称（英文）
+                    chemicalFormula:
+                      type: string
+                      description: 化学式（如SiO2）
+                    density:
+                      type: number
+                      format: float
+                      description: 密度（单位：g/cm³）
+                    hardness:
+                      type: number
+                      format: float
+                      description: 莫氏硬度
+                    crystalSystem:
+                      type: string
+                      description: 晶系（如三方晶系=trigonal）
+                    cleavage:
+                      type: string
+                      description: 解理特性（选矿解离关键参数）
+        '400':  # 错误响应码
+          description: 参数错误（如矿物名称为空或格式错误）
+        '404':
+          description: 未找到该矿物数据（请检查矿物英文名是否正确）
+        '500':
+          description: API服务器错误（请稍后重试）
